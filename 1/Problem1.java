@@ -1,5 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Problem1 {
 
@@ -35,14 +35,8 @@ public class Problem1 {
         }
     }
 
-    public static void main(String[] args) throws FileNotFoundException, IOException {
-
-        // hardcoded arrays because i didn't want to read the size
-        // or use other data structs lol
-
-        int[] list1 = new int[1000];
-        int[] list2 = new int[1000];
-
+    // read the input from a file
+    public static void populate(String[] args, int[] list1, int[] list2) throws FileNotFoundException, IOException {
         try {
             String file = (args.length > 0) ? args[0] : "input.txt";
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -58,6 +52,7 @@ public class Problem1 {
                 ++i;
             }
             br.close();
+
         } catch (FileNotFoundException e) {
             System.err.println("Couldn't find the file!\n" + e);
             System.exit(1);
@@ -65,19 +60,51 @@ public class Problem1 {
             System.err.println("IOException:\n" + e);
             System.exit(1);
         }
+    }
+
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+
+        // hardcoded arrays because i didn't want to read the size
+        // or use other data structs lol
+
+        int[] list1 = new int[1000];
+        int[] list2 = new int[1000];
+
+        // PART 1 -- distance via sum of diffs
+
+        populate(args, list1, list2);
 
         int sum = 0;
 
         quicksort(list1, 0, list1.length - 1);
-        System.out.println("Sorted 1");
+        System.out.println("Sorted left nums");
         quicksort(list2, 0, list2.length - 1);
-        System.out.println("Sorted 2");
+        System.out.println("Sorted right nums");
 
-        for (int i = 0; i < list1.length; i++) {
-            System.out.printf("Distance between %d and %d is %d\n", list1[i], list2[i], Math.abs(list1[i] - list2[i]));
+        for (int i = 0; i < list1.length; i++)
             sum += Math.abs(list1[i] - list2[i]);
+
+        System.out.printf("***PART 1***\n\tThe total distance is %d\n", sum);
+
+        // PART 2 -- similarity score
+
+        HashMap<Integer, Integer> occurrences = new HashMap<Integer, Integer>();
+        int similarity = 0;
+
+        for (int i = 0; i < list2.length; i++) {
+            if (occurrences.get(list2[i]) == null)
+                occurrences.put(list2[i], 1);
+            else
+                occurrences.put(list2[i], occurrences.get(list2[i]) + 1);
         }
 
-        System.out.println("The total distance is " + sum);
+        for (int i = 0; i < list1.length; i++) {
+            if (occurrences.get(list1[i]) != null) {
+                System.out.printf("\nFound %d has occurred %d times\n", list1[i], occurrences.get(list1[i]));
+                similarity += list1[i] * occurrences.get(list1[i]);
+            }
+        }
+
+        System.out.printf("***PART 2***\n\tThe similarity score is %d\n", similarity);
     }
 }
